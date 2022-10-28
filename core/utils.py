@@ -152,6 +152,10 @@ def draw_bbox(image, bboxes, classes=read_class_names(cfg.YOLO.CLASSES), show_la
         c1, c2 = (int(coor[1]), int(coor[0])), (int(coor[3]), int(coor[2]))
         cv2.rectangle(image, c1, c2, bbox_color, bbox_thick)
 
+        # writing
+        cropped_image = image[int(coor[0]):int(coor[2]), int(coor[1]):int(coor[3])]
+        return cropped_image
+
         if show_label:
             bbox_mess = '%s: %.2f' % (classes[class_ind], score)
             t_size = cv2.getTextSize(bbox_mess, 0, fontScale, thickness=bbox_thick // 2)[0]
