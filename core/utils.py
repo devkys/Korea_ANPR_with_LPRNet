@@ -125,6 +125,17 @@ def image_preprocess(image, target_size, gt_boxes=None):
         gt_boxes[:, [1, 3]] = gt_boxes[:, [1, 3]] * scale + dh
         return image_paded, gt_boxes
 
+
+def format_boxes(bboxes, image_height, image_width):
+    for box in bboxes:
+        ymin = int(box[0] * image_height)
+        xmin = int(box[1] * image_width)
+        ymax = int(box[2] * image_height)
+        xmax = int(box[3] * image_width)
+        box[0], box[1], box[2], box[3] = xmin, ymin, xmax, ymax
+    return bboxes
+
+
 def draw_bbox(image, bboxes, classes=read_class_names(cfg.YOLO.CLASSES), show_label=True):
     num_classes = len(classes)
     image_h, image_w, _ = image.shape
@@ -157,6 +168,8 @@ def draw_bbox(image, bboxes, classes=read_class_names(cfg.YOLO.CLASSES), show_la
         cropped_image = image[int(coor[0]):int(coor[2]), int(coor[1]):int(coor[3])]
         result_img = Image.fromarray(cropped_image.astype(np.uint8))
         result_img.show()
+
+       # return result_img
 
         if show_label:
             bbox_mess = '%s: %.2f' % (classes[class_ind], score)

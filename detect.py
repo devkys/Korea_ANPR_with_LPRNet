@@ -24,6 +24,7 @@ flags.DEFINE_string('image', './data/kite.jpg', 'path to input image')
 flags.DEFINE_string('output', 'result.png', 'path to output image')
 flags.DEFINE_float('iou', 0.45, 'iou threshold')
 flags.DEFINE_float('score', 0.25, 'score threshold')
+flags.DEFINE_boolean('crop', True, 'crop detections from images')
 flags.DEFINE_boolean('lpr', False, 'perform license plate recognition')
 
 def main(_argv):
@@ -41,6 +42,9 @@ def main(_argv):
     image_data = cv2.resize(original_image, (input_size, input_size))
     image_data = image_data / 255.
     # image_data = image_data[np.newaxis, ...].astype(np.float32)
+
+    image_name = image_path.split('/')[-1]
+    image_name = image_name.split('.')[0]
 
     images_data = []
     for i in range(1):
@@ -80,16 +84,32 @@ def main(_argv):
         score_threshold=FLAGS.score
     )
     pred_bbox = [boxes.numpy(), scores.numpy(), classes.numpy(), valid_detections.numpy()]
+    original_h, original_w, _ = original_image.shape
+    bboxes = utils.format_boxes(boxes.numpy()[0], original_h, original_w)
+    pred_bbox2 = [bboxes, scores.numpy()[0], classes.numpy()[0], valid_detections.numpy()[0]]
+
     image = utils.draw_bbox(original_image, pred_bbox)
     # image = utils.draw_bbox(image_data*255, pred_bbox)
     image = Image.fromarray(image.astype(np.uint8))
     image.show()
     image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
     # cv2.imwrite(FLAGS.output, image)
+   # image_file = image_path[14:]
+   # folder_path = './result/{0}'.format(image_file)
+   # write_file = cv2.imwrite(folder_path, image)
+    class_names = utils.read_class_names(cfg.YOLO.CLASSES)
 
-    image_file = image_path[14:]
-    folder_path = './result/{0}'.format(image_file)
-    write_file = cv2.imwrite(folder_path, image)
+   # allowed_classes = list(class_names.values())
+    allowed_classes = ['license_plate']
+    if FLAGS.crop:
+        crop_path = os.path.join(os.getcwd(), 'detections', 'crop', image_name)
+
+        try:
+            os.mkdir(crop_path)
+        except FileExistsError:
+            pass
+        crop_objects(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB), pred_bbox2,
+                     crop_path, allowed_classes)
 
 if __name__ == '__main__':
     try:

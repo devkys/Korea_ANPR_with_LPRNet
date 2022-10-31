@@ -13,6 +13,7 @@ from lpr.loader import resize_and_normailze
 # function for cropping each detection and saving as new image
 def crop_objects(img, data, path, allowed_classes):
     boxes, scores, classes, num_objects = data
+    #print(boxes)
     class_names = read_class_names(cfg.YOLO.CLASSES)
     #create dictionary to hold count of objects for image name
     counts = dict()
@@ -24,14 +25,15 @@ def crop_objects(img, data, path, allowed_classes):
             counts[class_name] = counts.get(class_name, 0) + 1
             # get box coords
             xmin, ymin, xmax, ymax = boxes[i]
-            #print(location)
             # crop detection from image (take an additional 5 pixels around all edges)
             cropped_img = img[int(ymin):int(ymax), int(xmin):int(xmax)]
             # construct image name and join it to path for saving crop properly
-            img_name = class_name + '_' + str(location[-1]) + '.jpg'
+            img_name = class_name + '_' + str(counts[class_name]) + '.jpg'
             img_path = os.path.join(path, img_name)
             # save image
             cv2.imwrite(img_path, cropped_img)
+           # plateNumber = lpr(img_path)
+            lpr(img_path)
         else:
             continue
 
@@ -51,7 +53,6 @@ def lpr(img):
     net = LPRNet(len(classnames) + 1)
     net.load_weights(args["weights"])
 
-   # img = cv2.imread(args["image"])
     img = cv2.imread(img)
 
 
