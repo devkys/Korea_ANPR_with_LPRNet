@@ -8,6 +8,7 @@ import core.utils as utils
 from core.yolov4 import filter_boxes
 from tensorflow.python.saved_model import tag_constants
 from PIL import Image
+from core.functions import *
 import cv2
 import numpy as np
 from tensorflow.compat.v1 import ConfigProto
@@ -23,6 +24,7 @@ flags.DEFINE_string('image', './data/kite.jpg', 'path to input image')
 flags.DEFINE_string('output', 'result.png', 'path to output image')
 flags.DEFINE_float('iou', 0.45, 'iou threshold')
 flags.DEFINE_float('score', 0.25, 'score threshold')
+flags.DEFINE_boolean('lpr', False, 'perform license plate recognition')
 
 def main(_argv):
     config = ConfigProto()

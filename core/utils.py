@@ -4,6 +4,7 @@ import colorsys
 import numpy as np
 import tensorflow as tf
 from core.config import cfg
+from PIL import Image
 
 def load_freeze_layer(model='yolov4', tiny=False):
     if tiny:
@@ -154,7 +155,8 @@ def draw_bbox(image, bboxes, classes=read_class_names(cfg.YOLO.CLASSES), show_la
 
         # writing
         cropped_image = image[int(coor[0]):int(coor[2]), int(coor[1]):int(coor[3])]
-        return cropped_image
+        result_img = Image.fromarray(cropped_image.astype(np.uint8))
+        result_img.show()
 
         if show_label:
             bbox_mess = '%s: %.2f' % (classes[class_ind], score)

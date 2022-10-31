@@ -15,9 +15,7 @@ def crop_objects(img, data, path, allowed_classes):
     boxes, scores, classes, num_objects = data
     class_names = read_class_names(cfg.YOLO.CLASSES)
     #create dictionary to hold count of objects for image name
-    jdict = [{"location": f"A{i+1}", "inOut": "out"} for i in range(3)]
     counts = dict()
-    idx = 0
     for i in range(num_objects):
         # get count of class for part of image name
         class_index = int(classes[i])
@@ -26,8 +24,6 @@ def crop_objects(img, data, path, allowed_classes):
             counts[class_name] = counts.get(class_name, 0) + 1
             # get box coords
             xmin, ymin, xmax, ymax = boxes[i]
-            is_electric_car = electric_car(img, boxes[i])
-            location = loc(img, xmin, xmax)
             #print(location)
             # crop detection from image (take an additional 5 pixels around all edges)
             cropped_img = img[int(ymin):int(ymax), int(xmin):int(xmax)]
@@ -36,13 +32,9 @@ def crop_objects(img, data, path, allowed_classes):
             img_path = os.path.join(path, img_name)
             # save image
             cv2.imwrite(img_path, cropped_img)
-            carNum, prob = OCR(img_path)
-            count = {"location": location, "inOut": "in", "carNum" : carNum[0], "electric" : is_electric_car, "disabled" : 0, "credit": prob}
-            jdict[int(location[-1])-1] = count
         else:
             continue
 
-    return jdict
 
 classnames = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
               "가", "나", "다", "라", "마", "거", "너", "더", "러",
@@ -53,18 +45,21 @@ classnames = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
 
 def lpr(img):
     # t = time()
-    args = {'image' : img, 'weights' : './ocr/weights_best.pb'}
+    args = {'weights' : './lpr/weights_best.pb'}
 
     #tf.compat.v1.enable_eager_execution()
     net = LPRNet(len(classnames) + 1)
     net.load_weights(args["weights"])
 
-    img = cv2.imread(args["image"])
+   # img = cv2.imread(args["image"])
+    img = cv2.imread(img)
+
 
     x = np.expand_dims(resize_and_normailze(img), axis=0)
 
     print(net.predict(x, classnames))
 
+    cv2.imshow("lp", img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
